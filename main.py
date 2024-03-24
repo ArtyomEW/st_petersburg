@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from openpyxl import load_workbook
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from icecream import ic
 import numpy
 import time
 
