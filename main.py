@@ -47,7 +47,7 @@ def taking_email_phone_and_website(link):
     driver.quit()
 
 
-def add_el_in_links(svg, driver, count_page):
+def add_el_in_links(svg, driver, count_page=100):
     global links
 
     page = 0
