@@ -70,10 +70,11 @@ def add_el_in_links(svg, driver, count_page):
 
 def main():
     global links
-    link = input('Введите ссылку-> ')
+    link = input('Введите ссылку для сбора информации-> ')
     try:
-        count_page = int(input('Введите кол-во страниц-> '))
-    except:
+        count_page = int(input('Введите число желаемых страниц для парсинга-> '))
+    except ValueError:
+        print('Сейчас будет парсинг всех страниц сайта')
         count_page = 110
     """Функция что бы браузер не закрывался"""
     chr_options = Options()
@@ -94,4 +95,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
