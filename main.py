@@ -47,7 +47,7 @@ def taking_email_phone_and_website(link):
     driver.quit()
 
 
-def add_el_in_links(svg, driver, count_page=100):
+def add_el_in_links(svg, driver, count_page):
     global links
 
     page = 0
@@ -68,9 +68,13 @@ def add_el_in_links(svg, driver, count_page=100):
         taking_email_phone_and_website(i)
 
 
-def main(link: str, count_page: int):
+def main():
     global links
-
+    link = input('Введите ссылку-> ')
+    try:
+        count_page = int(input('Введите кол-во страниц-> '))
+    except:
+        count_page = 110
     """Функция что бы браузер не закрывался"""
     chr_options = Options()
     chr_options.add_experimental_option("detach", True)
@@ -89,6 +93,5 @@ def main(link: str, count_page: int):
 
 
 if __name__ == '__main__':
-    main(link=input('Введите ссылку для сбора информации-> '), count_page=int(input('Введите число желаемых страниц '
-                                                                                    'для парсинга-> ')))
+    main()
 
