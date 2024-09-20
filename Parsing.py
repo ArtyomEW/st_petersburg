@@ -23,6 +23,7 @@ class Gis2:
     def taking_email_phone_and_website(cls, link):
         fn = '2gis.xlsx'
         wb = load_workbook(fn)
+        print(fn)
         ws = wb['Лист1']
         driver = cls.site_does_not_close()
         driver.get(link)
@@ -62,6 +63,7 @@ class Gis2:
             cls.page += 1
             #Кликаем по тегу для перехода на следующую страницу
             driver.execute_script("arguments[0].click();", svg)
+        print(cls.links)
         driver.quit()
         for i in cls.links:
             cls.taking_email_phone_and_website(i)
