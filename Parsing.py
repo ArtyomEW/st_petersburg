@@ -13,6 +13,16 @@ class Gis2:
     page = 0
 
     @staticmethod
+    def bs4(driver):
+        """Функция, которая определяет,
+        дошёл ли скрипт до последней страницы"""
+        bs = BeautifulSoup(driver.page_source, 'html.parser')
+        _7q94tr = bs.findAll('div', class_='_7q94tr')
+        if not _7q94tr:
+            return False
+        return True
+
+    @staticmethod
     def site_does_not_close():
         chr_options = Options()
         chr_options.add_experimental_option("detach", True)
@@ -23,7 +33,6 @@ class Gis2:
     def taking_email_phone_and_website(cls, link):
         fn = '2gis.xlsx'
         wb = load_workbook(fn)
-        print(fn)
         ws = wb['Лист1']
         driver = cls.site_does_not_close()
         driver.get(link)
@@ -50,10 +59,9 @@ class Gis2:
         wb.save(fn)
         driver.quit()
 
-
     @classmethod
-    def add_el_in_links(cls, svg, driver, count_page):
-        while cls.page < count_page:
+    def find_firm_link_if_all_page_True(cls, driver, svg):
+        while True:
             time.sleep(3)
             link = driver.find_elements(By.TAG_NAME, 'a')
             for l in link:
@@ -61,20 +69,51 @@ class Gis2:
                 if href is not None and 'firm' in href and href not in cls.links:
                     cls.links = numpy.append(cls.links, href)
             cls.page += 1
-            #Кликаем по тегу для перехода на следующую страницу
+            # Кликаем по тегу для перехода на следующую страницу
             driver.execute_script("arguments[0].click();", svg)
-        print(cls.links)
-        driver.quit()
-        for i in cls.links:
-            cls.taking_email_phone_and_website(i)
+            if cls.bs4(driver):
+                driver.quit()
+                for i in cls.links:
+                    cls.taking_email_phone_and_website(i)
+                return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
+
+    @classmethod
+    def add_el_in_links(cls, svg, driver, count_page, all_page=False):
+        try:
+            if not all_page:
+                while cls.page < int(count_page):
+                    time.sleep(3)
+                    link = driver.find_elements(By.TAG_NAME, 'a')
+                    for l in link:
+                        href = l.get_attribute('href')
+                        if href is not None and 'firm' in href and href not in cls.links:
+                            cls.links = numpy.append(cls.links, href)
+                    cls.page += 1
+                    #Кликаем по тегу для перехода на следующую страницу
+                    driver.execute_script("arguments[0].click();", svg)
+                    if cls.bs4(driver):
+                        driver.quit()
+                        for i in cls.links:
+                            cls.taking_email_phone_and_website(i)
+                        return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
+            else:
+                cls.find_firm_link_if_all_page_True(driver, svg)
+            driver.quit()
+            for i in cls.links:
+                cls.taking_email_phone_and_website(i)
+        except Exception:
+            print('Попробуйте снова!')
+
 
     @classmethod
     def main(cls):
+        all_page = False
         link: str = input('Ссылка для сбора информации-> ')
         count_page = input('Число желаемых страниц для парсинга-> ')
         if count_page == '':
             print('Сейчас будет парсинг всех страниц сайта')
-            count_page = 110
+            count_page = 0
+            all_page = True
         #Функция, что бы браузер не закрывался
         driver = cls.site_does_not_close()
         #Переходим на наш сайт
@@ -85,8 +124,7 @@ class Gis2:
                                                    'div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div._1tdquig > '
                                                    'div._z72pvu > div._3zzdxk > div > div > div > div._1x4k6z7 > div._5ocwns > div._n5hmn94')
 
-        cls.add_el_in_links(svg, driver, int(count_page))
-
+        cls.add_el_in_links(svg, driver, count_page, all_page)
 
 if __name__ == '__main__':
     gis = Gis2()
