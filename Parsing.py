@@ -58,6 +58,7 @@ class Gis2:
         ws.append(lst)
         wb.save(fn)
         driver.quit()
+        return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
 
     @classmethod
     def find_firm_link_if_range_True(cls, driver, svg, start, stop):
@@ -79,7 +80,6 @@ class Gis2:
                 driver.quit()
                 for i in cls.links:
                     cls.taking_email_phone_and_website(i)
-                return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
         driver.quit()
         for i in cls.links:
             cls.taking_email_phone_and_website(i)
@@ -100,7 +100,6 @@ class Gis2:
                 driver.quit()
                 for i in cls.links:
                     cls.taking_email_phone_and_website(i)
-                return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
 
     @classmethod
     def add_el_in_links(cls, svg, driver, count_page = 0, all_page=False):
@@ -120,7 +119,6 @@ class Gis2:
                         driver.quit()
                         for i in cls.links:
                             cls.taking_email_phone_and_website(i)
-                        return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
             else:
                 cls.find_firm_link_if_all_page_True(driver, svg)
             driver.quit()
