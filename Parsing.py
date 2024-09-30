@@ -80,6 +80,10 @@ class Gis2:
                 for i in cls.links:
                     cls.taking_email_phone_and_website(i)
                 return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
+        driver.quit()
+        for i in cls.links:
+            cls.taking_email_phone_and_website(i)
+
 
     @classmethod
     def find_firm_link_if_all_page_True(cls, driver, svg):
@@ -99,7 +103,7 @@ class Gis2:
                 return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
 
     @classmethod
-    def add_el_in_links(cls, svg, driver, count_page = 0, all_page=False, range_B=False):
+    def add_el_in_links(cls, svg, driver, count_page = 0, all_page=False):
         try:
             if not all_page:
                 while cls.page < int(count_page):
