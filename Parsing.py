@@ -60,15 +60,19 @@ class Gis2:
         driver.quit()
 
     @classmethod
-    def find_firm_link_if_all_page_True(cls, driver, svg):
-        while True:
+    def find_firm_link_if_range_True(cls, driver, svg, start, stop):
+        while cls.page < start:
+            driver.execute_script("arguments[0].click();", svg)
+            time.sleep(2)
+            cls.page += 1
+        while start < stop:
             time.sleep(3)
             link = driver.find_elements(By.TAG_NAME, 'a')
             for l in link:
                 href = l.get_attribute('href')
                 if href is not None and 'firm' in href and href not in cls.links:
                     cls.links = numpy.append(cls.links, href)
-            cls.page += 1
+            start += 1
             # Кликаем по тегу для перехода на следующую страницу
             driver.execute_script("arguments[0].click();", svg)
             if cls.bs4(driver):
@@ -78,7 +82,24 @@ class Gis2:
                 return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
 
     @classmethod
-    def add_el_in_links(cls, svg, driver, count_page, all_page=False):
+    def find_firm_link_if_all_page_True(cls, driver, svg):
+        while True:
+            time.sleep(3)
+            link = driver.find_elements(By.TAG_NAME, 'a')
+            for l in link:
+                href = l.get_attribute('href')
+                if href is not None and 'firm' in href and href not in cls.links:
+                    cls.links = numpy.append(cls.links, href)
+            # Кликаем по тегу для перехода на следующую страницу
+            driver.execute_script("arguments[0].click();", svg)
+            if cls.bs4(driver):
+                driver.quit()
+                for i in cls.links:
+                    cls.taking_email_phone_and_website(i)
+                return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
+
+    @classmethod
+    def add_el_in_links(cls, svg, driver, count_page = 0, all_page=False, range_B=False):
         try:
             if not all_page:
                 while cls.page < int(count_page):
@@ -104,27 +125,42 @@ class Gis2:
         except Exception:
             print('Попробуйте снова!')
 
+    @staticmethod
+    def get_svg(driver):
+        # Находим наш тег для перехода на следующую страницу
+        svg = driver.find_element(By.CSS_SELECTOR, '#root > div > div > div._1sf34doj > div._1u4plm2 > '
+                                                   'div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div._1tdquig > '
+                                                   'div._z72pvu > div._3zzdxk > div > div > div > div._1x4k6z7 > div._5ocwns > div._n5hmn94')
+        return svg
 
     @classmethod
     def main(cls):
-        all_page = False
+        all_page: bool = False
         link: str = input('Ссылка для сбора информации-> ')
+        range_input: str = input('Пример: 10-20. '
+                            'Если диапазон не нужен, нажмите Enter -> ')
+        if range_input != '':
+            driver = cls.site_does_not_close()
+            driver.get(link)
+            time.sleep(2)
+            svg = cls.get_svg(driver)
+            range_input: list[int] = [int(i) for i in range_input.split('-')]
+            start, stop = range_input[0],range_input[1]
+            cls.find_firm_link_if_range_True(svg=svg, driver=driver,
+                                             start=start, stop=stop)
+
         count_page = input('Число желаемых страниц для парсинга-> ')
         if count_page == '':
-            print('Сейчас будет парсинг всех страниц сайта')
+            print('Сейчас начнётся парсинг всех страниц сайта')
             count_page = 0
-            all_page = True
+            all_page: bool = True
         #Функция, что бы браузер не закрывался
         driver = cls.site_does_not_close()
         #Переходим на наш сайт
         driver.get(link)
         time.sleep(2)
-        #Находим наш тег для перехода на следующую страницу
-        svg = driver.find_element(By.CSS_SELECTOR, '#root > div > div > div._1sf34doj > div._1u4plm2 > '
-                                                   'div:nth-child(3) > div > div > div:nth-child(2) > div > div > div > div._1tdquig > '
-                                                   'div._z72pvu > div._3zzdxk > div > div > div > div._1x4k6z7 > div._5ocwns > div._n5hmn94')
-
-        cls.add_el_in_links(svg, driver, count_page, all_page)
+        svg = cls.get_svg(driver)
+        cls.add_el_in_links(svg=svg, driver=driver, count_page=count_page, all_page=all_page)
 
 if __name__ == '__main__':
     gis = Gis2()
