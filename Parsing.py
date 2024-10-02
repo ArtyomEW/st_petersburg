@@ -7,7 +7,6 @@ import numpy
 import time
 
 
-
 class Gis2:
     links = numpy.array([])
     page = 0
@@ -58,15 +57,17 @@ class Gis2:
         ws.append(lst)
         wb.save(fn)
         driver.quit()
-        return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
 
     @classmethod
     def find_firm_link_if_range_True(cls, driver, svg, start, stop):
-        while cls.page < start:
+        while cls.page < start-1:
             driver.execute_script("arguments[0].click();", svg)
             time.sleep(2)
+            if cls.bs4(driver):
+                driver.quit()
+                return 'Вы превысили лимит страниц'
             cls.page += 1
-        while start < stop:
+        while start < stop+1:
             time.sleep(3)
             link = driver.find_elements(By.TAG_NAME, 'a')
             for l in link:
@@ -83,7 +84,6 @@ class Gis2:
         driver.quit()
         for i in cls.links:
             cls.taking_email_phone_and_website(i)
-
 
     @classmethod
     def find_firm_link_if_all_page_True(cls, driver, svg):
@@ -102,7 +102,7 @@ class Gis2:
                     cls.taking_email_phone_and_website(i)
 
     @classmethod
-    def add_el_in_links(cls, svg, driver, count_page = 0, all_page=False):
+    def add_el_in_links(cls, svg, driver, count_page=0, all_page=False):
         try:
             if not all_page:
                 while cls.page < int(count_page):
@@ -113,7 +113,7 @@ class Gis2:
                         if href is not None and 'firm' in href and href not in cls.links:
                             cls.links = numpy.append(cls.links, href)
                     cls.page += 1
-                    #Кликаем по тегу для перехода на следующую страницу
+                    # Кликаем по тегу для перехода на следующую страницу
                     driver.execute_script("arguments[0].click();", svg)
                     if cls.bs4(driver):
                         driver.quit()
@@ -140,30 +140,35 @@ class Gis2:
         all_page: bool = False
         link: str = input('Ссылка для сбора информации-> ')
         range_input: str = input('Пример: 10-20. '
-                            'Если диапазон не нужен, нажмите Enter -> ')
+                                 'Если диапазон не нужен,тогда ничего не вводив нажмите Enter -> ')
         if range_input != '':
             driver = cls.site_does_not_close()
             driver.get(link)
             time.sleep(2)
             svg = cls.get_svg(driver)
             range_input: list[int] = [int(i) for i in range_input.split('-')]
-            start, stop = range_input[0],range_input[1]
-            cls.find_firm_link_if_range_True(svg=svg, driver=driver,
+            start, stop = range_input[0], range_input[1]
+            limit = cls.find_firm_link_if_range_True(svg=svg, driver=driver,
                                              start=start, stop=stop)
+            if limit:
+                return limit
+            return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
 
         count_page = input('Число желаемых страниц для парсинга-> ')
         if count_page == '':
             print('Сейчас начнётся парсинг всех страниц сайта')
             count_page = 0
             all_page: bool = True
-        #Функция, что бы браузер не закрывался
+        # Функция, что бы браузер не закрывался
         driver = cls.site_does_not_close()
-        #Переходим на наш сайт
+        # Переходим на наш сайт
         driver.get(link)
         time.sleep(2)
         svg = cls.get_svg(driver)
         cls.add_el_in_links(svg=svg, driver=driver, count_page=count_page, all_page=all_page)
+        return "ВСЕ СТРАНИЦЫ УСПЕШНО СПАРСИЛИСЬ"
+
 
 if __name__ == '__main__':
     gis = Gis2()
-    gis.main()
+    print(gis.main())
